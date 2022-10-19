@@ -121,7 +121,7 @@ int main(void)
         return -1;
 
     // Create a windowed mode window and its OpenGL context 
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);//en windows
     if (!window)
     {
         glfwTerminate();
@@ -129,7 +129,7 @@ int main(void)
     }
 
     // Make the window's context current 
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(window);//en windows
 
     // Glew Init.
     if (glewInit() != GLEW_OK)
@@ -174,14 +174,14 @@ int main(void)
     while (!glfwWindowShouldClose(window))
     {
         // Render here 
-        GLCall(glClear(GL_COLOR_BUFFER_BIT));
+        GLCall(glClear(GL_COLOR_BUFFER_BIT));//en windows
 
 
         // Draw Binded buffer
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
         // Swap front and back buffers 
-        GLCall(glfwSwapBuffers(window));
+        GLCall(glfwSwapBuffers(window));//en windows
 
         // Poll for and process events 
         GLCall(glfwPollEvents());
