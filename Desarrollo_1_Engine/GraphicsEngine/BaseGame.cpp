@@ -64,7 +64,8 @@ static ShaderProgramSource ParseShader(const std::string& filepath) // pre-shade
     return { ss[0].str(), ss[1].str() };
 }
 
-static unsigned int CompileShader(unsigned int type, const std::string & source)
+
+static unsigned int CompileShader(unsigned int type, const std::string& source) //shader
 {
     unsigned int id = glCreateShader(type);
     const char* src = source.c_str();
@@ -92,7 +93,8 @@ static unsigned int CompileShader(unsigned int type, const std::string & source)
 }
 // ^
 // "Writing a shader in openGL" - cherno (vid)
-static unsigned int CreateShader(const std::string & vertexShader, const std::string & fragmentShader)
+// v
+static unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader)
 {
     unsigned int program = glCreateProgram();
     unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
@@ -172,13 +174,25 @@ int main(void)
     unsigned int ibo; //Index Buffer Object = ibo
     GLCall(glGenBuffers(1, &ibo));
     GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
-    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
+    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * 2 * sizeof(float), indices, GL_STATIC_DRAW));
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     ShaderProgramSource source = ParseShader("../GraphicsEngine/Shader.shader");
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
     glUseProgram(shader);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    GLCall( int location = glGetUniformLocation(shader, "u_Color"));//Shader color - Uniform
+    ASSERT(location != -1); 
+    glUniform4f(location, 0.5f, 0.3f, 0.9f, 1.0f); 
+    float r = 0.0f;  float g = 0.0f; float b = 0.0f;
+    float increment = 0.5f; // End Shader color - Uniform
+
+    GLCall(glBindVertexArray(0));
+    GLCall(glUseProgram(0));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+
+
 
     // Main Loop
     while (!glfwWindowShouldClose(window))
@@ -186,8 +200,13 @@ int main(void)
         // Render here 
         GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
-
         // Draw Binded buffer
+        GLCall(glUseProgram(shader));
+        GLCall(glUniform4f(location, r, 0.3f, 0.9f, 1.0f)); //uniform color
+
+        GLCall(glBindVertexArray(vao));
+        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
         if (r > 1.0f)  // Swaps color while running
