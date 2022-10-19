@@ -122,6 +122,9 @@ int main(void)
 
     // Create a windowed mode window and its OpenGL context 
     window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    glfwSwapInterval(2);
+
+
     if (!window)
     {
         glfwTerminate();
@@ -163,12 +166,20 @@ int main(void)
     GLCall(glGenBuffers(1, &ibo));
     GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
     GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     ShaderProgramSource source = ParseShader("../GraphicsEngine/Shader.shader");
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
     glUseProgram(shader);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    GLCall( int location = glGetUniformLocation(shader, "u_Color"));//Shader color - Uniform
+    ASSERT(location != -1); 
+    glUniform4f(location, 0.5f, 0.3f, 0.9f, 1.0f); 
+
+    float r = 0.0f;
+    float g = 0.0f;
+    float b = 0.0f;
+    float increment = 0.5f; // End Shader color - Uniform
 
     // Main Loop
     while (!glfwWindowShouldClose(window))
@@ -176,10 +187,16 @@ int main(void)
         // Render here 
         GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
-
         // Draw Binded buffer
+        GLCall(glUniform4f(location, r, 0.3f, 0.9f, 1.0f));
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
+        if (r > 1.0f)  // Swaps color while running
+            increment = -0.5f;
+        else if (r < 0.0f)
+            increment = 0.05f;
+        r += increment;
+    
         // Swap front and back buffers 
         GLCall(glfwSwapBuffers(window));
 
