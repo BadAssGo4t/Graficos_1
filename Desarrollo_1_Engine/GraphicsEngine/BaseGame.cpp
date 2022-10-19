@@ -2,7 +2,6 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -33,9 +32,10 @@ struct ShaderProgramSource //Shader goes into Renderer
     std::string VertexSource;
     std::string FragmentSource;
 };
-static ShaderProgramSource ParseShader(const std::string& filepath) 
+
+static ShaderProgramSource ParseShader(const std::string& filepath)
 {
-    std::fstream stream(filepath);
+    std::ifstream stream(filepath);
 
     enum class ShaderType
     {
@@ -64,7 +64,8 @@ static ShaderProgramSource ParseShader(const std::string& filepath)
     return { ss[0].str(), ss[1].str() };
 }
 
-static unsigned int CompileShader(unsigned int type, const std::string & source)
+
+static unsigned int CompileShader(unsigned int type, const std::string& source)
 {
     unsigned int id = glCreateShader(type);
     const char* src = source.c_str();
@@ -79,7 +80,7 @@ static unsigned int CompileShader(unsigned int type, const std::string & source)
     {
         int lenght;
         GLCall(glGetShaderiv(id, GL_INFO_LOG_LENGTH, &lenght));
-        char* message = (char*)alloca (lenght * sizeof(char));
+        char* message = (char*)alloca(lenght * sizeof(char));
         GLCall(glGetShaderInfoLog(id, lenght, &lenght, message));
         std::cout << "failed to compile " << (type == GL_VERTEX_SHADER ? " vertex" : " fragment");
 
@@ -92,7 +93,7 @@ static unsigned int CompileShader(unsigned int type, const std::string & source)
 }
 // ^
 // "Writing a shader in openGL" - cherno (vid)
-static unsigned int CreateShader(const std::string & vertexShader, const std::string & fragmentShader)
+static unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader)
 {
     unsigned int program = glCreateProgram();
     unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
@@ -110,8 +111,6 @@ static unsigned int CreateShader(const std::string & vertexShader, const std::st
 
     return program;
 }
-
-
 
 int main(void)
 {
@@ -165,13 +164,9 @@ int main(void)
     GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
     GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
 
-    ShaderProgramSource source = ParseShader("Res/Shaders/Shader.shader");
-    std::cout << "VERTEX" << std::endl;
-    std::cout << source.VertexSource << std::endl;
-    std::cout << "FRAGMENT" << std::endl;
-    std::cout << source.FragmentSource << std::endl;
-    //unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
-    //glUseProgram(shader);
+    ShaderProgramSource source = ParseShader("../GraphicsEngine/Shader.shader");
+    unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
+    glUseProgram(shader);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -192,7 +187,7 @@ int main(void)
         GLCall(glfwPollEvents());
     }
 
-    //GLCall(glDeleteProgram(shader));
+    GLCall(glDeleteProgram(shader));
 
     glfwTerminate();
     return 0;
