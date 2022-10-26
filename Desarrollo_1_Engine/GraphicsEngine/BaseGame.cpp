@@ -158,16 +158,26 @@ int main(void)
         0, 1, 2,
         2, 3, 0
     };
-
-    unsigned int vao; // VAO - Vertex array
+    
+    // VAO - Vertex array ---------------
+    unsigned int vao; 
     GLCall(glGenVertexArrays(1, &vao));
     GLCall(glBindVertexArray(vao));
+    // --  --  --  --  --  --  --  --  --
 
-    // LLamada a Vertex Buffer
+    // Call to Vertex Buffer
+    VertexArray va;
     VertexBuffer vb(positions, 4 * 2 * sizeof(float));
+    va.AddBuffer(vb);
 
-    GLCall(glEnableVertexAttribArray(0)); //Attrib - Layouts
+    BufferLayout layout;
+    layout.push<float>(3);
+    va.AddLayout(layout);
+
+    //Attrib - Layouts   ----------------
+    GLCall(glEnableVertexAttribArray(0)); 
     GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
+    // --  --  --  --  --  --  --  --  --
 
     //Index Buffer Object = ibo
     IndexBuffer ib(indices, 6);
@@ -200,6 +210,7 @@ int main(void)
         GLCall(glUniform4f(location, r, 0.3f, 0.9f, 1.0f)); //uniform color
 
         GLCall(glBindVertexArray(vao));
+        va.Bind();
         ib.bind(); // Bind Index buffer
 
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
