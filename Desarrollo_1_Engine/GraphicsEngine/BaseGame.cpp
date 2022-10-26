@@ -1,5 +1,6 @@
 #include "BaseGame.h"
-
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -143,7 +144,7 @@ int main(void)
     if (glewInit() != GLEW_OK)
         std::cout << "ERROR!" << std::endl;
     std::cout << glGetString(GL_VERSION) << std::endl;
-
+    {
     // triangle load
     float positions[] =
     {
@@ -162,28 +163,22 @@ int main(void)
     GLCall(glGenVertexArrays(1, &vao));
     GLCall(glBindVertexArray(vao));
 
-    unsigned int buffer; //Buffer bind
-    GLCall(glGenBuffers(1, &buffer));
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
-    GLCall(glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
+    // LLamada a Vertex Buffer
+    VertexBuffer vb(positions, 4 * 2 * sizeof(float));
 
-   
     GLCall(glEnableVertexAttribArray(0)); //Attrib - Layouts
     GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
 
-    unsigned int ibo; //Index Buffer Object = ibo
-    GLCall(glGenBuffers(1, &ibo));
-    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
-    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * 2 * sizeof(float), indices, GL_STATIC_DRAW));
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //Index Buffer Object = ibo
+    IndexBuffer ib(indices, 6);
 
     ShaderProgramSource source = ParseShader("../GraphicsEngine/Shader.shader");
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
     glUseProgram(shader);
 
-    GLCall( int location = glGetUniformLocation(shader, "u_Color"));//Shader color - Uniform
-    ASSERT(location != -1); 
-    glUniform4f(location, 0.5f, 0.3f, 0.9f, 1.0f); 
+    GLCall(int location = glGetUniformLocation(shader, "u_Color"));//Shader color - Uniform
+    ASSERT(location != -1);
+    glUniform4f(location, 0.5f, 0.3f, 0.9f, 1.0f);
     float r = 0.0f;  float g = 0.0f; float b = 0.0f;
     float increment = 0.5f; // End Shader color - Uniform
 
@@ -205,7 +200,7 @@ int main(void)
         GLCall(glUniform4f(location, r, 0.3f, 0.9f, 1.0f)); //uniform color
 
         GLCall(glBindVertexArray(vao));
-        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+        ib.bind(); // Bind Index buffer
 
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
@@ -214,7 +209,7 @@ int main(void)
         else if (r < 0.0f)
             increment = 0.05f;
         r += increment;
-    
+
         // Swap front and back buffers 
         GLCall(glfwSwapBuffers(window));
 
@@ -224,6 +219,7 @@ int main(void)
 
     GLCall(glDeleteProgram(shader));
 
+    }
     glfwTerminate();
     return 0;
 }
