@@ -33,7 +33,7 @@ struct ShaderProgramSource //Shader goes into Renderer
     std::string FragmentSource;
 };
 
-static ShaderProgramSource ParseShader(const std::string& filepath)
+static ShaderProgramSource ParseShader(const std::string& filepath) // pre-shader
 {
     std::ifstream stream(filepath);
 
@@ -64,8 +64,7 @@ static ShaderProgramSource ParseShader(const std::string& filepath)
     return { ss[0].str(), ss[1].str() };
 }
 
-
-static unsigned int CompileShader(unsigned int type, const std::string& source)
+static unsigned int CompileShader(unsigned int type, const std::string & source)
 {
     unsigned int id = glCreateShader(type);
     const char* src = source.c_str();
@@ -93,7 +92,7 @@ static unsigned int CompileShader(unsigned int type, const std::string& source)
 }
 // ^
 // "Writing a shader in openGL" - cherno (vid)
-static unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader)
+static unsigned int CreateShader(const std::string & vertexShader, const std::string & fragmentShader)
 {
     unsigned int program = glCreateProgram();
     unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
@@ -120,8 +119,15 @@ int main(void)
     if (!glfwInit())
         return -1;
 
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
     // Create a windowed mode window and its OpenGL context 
     window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    glfwSwapInterval(2);
+
+
     if (!window)
     {
         glfwTerminate();
@@ -150,13 +156,17 @@ int main(void)
         2, 3, 0
     };
 
-    unsigned int buffer;
+    unsigned int vao; // VAO - Vertex array
+    GLCall(glGenVertexArrays(1, &vao));
+    GLCall(glBindVertexArray(vao));
+
+    unsigned int buffer; //Buffer bind
     GLCall(glGenBuffers(1, &buffer));
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
     GLCall(glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
 
-    //Attrib - Layouts
-    GLCall(glEnableVertexAttribArray(0));
+   
+    GLCall(glEnableVertexAttribArray(0)); //Attrib - Layouts
     GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
 
     unsigned int ibo; //Index Buffer Object = ibo
@@ -180,6 +190,12 @@ int main(void)
         // Draw Binded buffer
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
+        if (r > 1.0f)  // Swaps color while running
+            increment = -0.5f;
+        else if (r < 0.0f)
+            increment = 0.05f;
+        r += increment;
+    
         // Swap front and back buffers 
         GLCall(glfwSwapBuffers(window));
 
