@@ -1,17 +1,18 @@
 #include "BaseGame.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "Renderer.h"
+#include "VertexArray.h"
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
 
-#define ASSERT(x)  if(!(x)) __debugbreak();
-#define GLCall(x) GLClearError();\
-    x;\
-    ASSERT (GLLogCall(#x, __FILE__, __LINE__));
+
 
 static void GLClearError()
 {
@@ -168,16 +169,9 @@ int main(void)
     // Call to Vertex Buffer
     VertexArray va;
     VertexBuffer vb(positions, 4 * 2 * sizeof(float));
-    va.AddBuffer(vb);
-
-    BufferLayout layout;
-    layout.push<float>(3);
-    va.AddLayout(layout);
-
-    //Attrib - Layouts   ----------------
-    GLCall(glEnableVertexAttribArray(0)); 
-    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
-    // --  --  --  --  --  --  --  --  --
+    VertexBufferLayout layout;
+    layout.Push<float>(2);
+    va.AddBuffer(vb, layout);
 
     //Index Buffer Object = ibo
     IndexBuffer ib(indices, 6);
@@ -209,7 +203,6 @@ int main(void)
         GLCall(glUseProgram(shader));
         GLCall(glUniform4f(location, r, 0.3f, 0.9f, 1.0f)); //uniform color
 
-        GLCall(glBindVertexArray(vao));
         va.Bind();
         ib.bind(); // Bind Index buffer
 
